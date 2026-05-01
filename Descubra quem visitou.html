@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Tracker Indonesia</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Helvetica, sans-serif; background: #f0f2f5; color: #1c1e21; text-align: center; padding: 10px; }
+        .card { background: white; border-radius: 12px; padding: 25px; max-width: 450px; margin: 20px auto; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid #ddd; }
+        h2 { color: #1877f2; font-size: 22px; margin-bottom: 10px; }
+        p { color: #606770; font-size: 14px; margin-bottom: 20px; }
+        
+        select, input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+        input::placeholder { color: #adb5bd; font-style: italic; opacity: 0.7; }
+
+        .btn-analisar { width: 100%; padding: 15px; background: #1877f2; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+
+        .perfil-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee; text-align: left; background: #fafafa; margin-bottom: 5px; border-radius: 8px; }
+        .foto-perfil { width: 45px; height: 45px; border-radius: 50%; background: #ccc; margin-right: 15px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 20px; }
+        .foto-blur { filter: blur(6px); }
+        .nome-blur { background: #ddd; height: 18px; width: 140px; filter: blur(5px); border-radius: 4px; }
+        
+        .revelado { filter: none !important; background: transparent !important; font-weight: bold; color: #1c1e21; }
+        
+        .btn-revelar { width: 100%; padding: 15px; background: #42b72a; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 20px; animation: pulse 1.5s infinite; }
+        
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        #loader { display: none; margin: 20px 0; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #1877f2; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Pelacak Profil Sosial</h2>
+    <p>Cari tahu siapa yang melihat profil Anda dalam 24 jam terakhir.</p>
+    
+    <div id="setup-section">
+        <label style="display:block; text-align:left; font-size: 12px; font-weight: bold;">Pilih Media Sosial:</label>
+        <select id="rede">
+            <option value="Instagram">Instagram</option>
+            <option value="Facebook">Facebook</option>
+            <option value="TikTok">TikTok</option>
+        </select>
+        
+        <input type="text" id="user" placeholder="@username_anda..." autocomplete="off">
+        
+        <button id="btnAnalisar" class="btn-analisar" onclick="analisar()">ANALISIS PROFIL</button>
+    </div>
+    
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top:10px;">Menghubungkan ke server...</p>
+    </div>
+
+    <div id="lista" style="display:none; margin-top: 20px;">
+        <p id="txt-resultado" style="color:#1c1e21;"></p>
+        
+        <div id="container-perfis"></div>
+        
+        <p style="font-size: 11px; margin-top: 10px;">Klik tombol di bawah untuk melihat siapa mereka.</p>
+        <button class="btn-revelar" id="btnRev" onclick="revelar()">LIHAT SIAPA MEREKA</button>
+    </div>
+</div>
+
+<script>
+    // Reset automático ao voltar
+    window.onpageshow = function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    };
+
+    let nomesSorteados = [];
+
+    function analisar() {
+        let user = document.getElementById('user').value;
+        
+        if(user == "" || !user.startsWith("@")) { 
+            alert("Format salah! Gunakan @ sebelum nama pengguna"); 
+            return; 
+        }
+
+        document.getElementById('setup-section').style.display = 'none';
+        document.getElementById('loader').style.display = 'block';
+        
+        // Gerar quantidade aleatória (1 a 4)
+        const qtd = Math.floor(Math.random() * 4) + 1;
+        const container = document.getElementById('container-perfis');
+        container.innerHTML = "";
+        
+        const nomesIndo = ["Arif Kurniawan", "Siti Rahmawati", "Bambang Utomo", "Dewi Lestari", "Eko Prasetyo", "Indah Permata", "Rizky Hidayat", "Putri Utami", "Agus Santoso", "Mega Wijaya", "Fajar Ramadhan", "Ani Suryani", "Hendra Kusuma", "Lestari Putri", "Dedi Setiawan", "Rina Amelia"];
+        
+        nomesSorteados = [];
+        for(let i=0; i<qtd; i++) {
+            let nome = nomesIndo[Math.floor(Math.random() * nomesIndo.length)];
+            while(nomesSorteados.includes(nome)) nome = nomesIndo[Math.floor(Math.random() * nomesIndo.length)];
+            nomesSorteados.push(nome);
+
+            container.innerHTML += `
+                <div class="perfil-item">
+                    <div class="foto-perfil foto-blur" id="f${i}">?</div>
+                    <div class="nome-blur" id="n${i}"></div>
+                </div>
+            `;
+        }
+
+        document.getElementById('txt-resultado').innerHTML = `<b>Hasil: ${qtd} orang baru saja melihat profil Anda:</b>`;
+
+        setTimeout(() => {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('lista').style.display = 'block';
+        }, 2500);
+    }
+
+    function revelar() {
+        const adsLink = "https://www.profitablecpmratenetwork.com/by3egwzkhv?key=558c341079eef93b03da38e40dd96195";
+        const cores = ["#3b5998", "#e1306c", "#1da1f2", "#00b489", "#ff3e00", "#45bd62", "#f57d00"];
+
+        nomesSorteados.forEach((nome, i) => {
+            document.getElementById(`n${i}`).innerText = nome;
+            document.getElementById(`n${i}`).className = "revelado";
+            document.getElementById(`f${i}`).style.background = cores[Math.floor(Math.random() * cores.length)];
+            document.getElementById(`f${i}`).classList.remove('foto-blur');
+            document.getElementById(`f${i}`).innerText = nome.charAt(0);
+        });
+
+        const btn = document.getElementById('btnRev');
+        btn.innerText = "Mohon tunggu...";
+        btn.style.background = "#888";
+        btn.style.animation = "none";
+
+        setTimeout(() => {
+            window.location.href = adsLink;
+        }, 600);
+    }
+</script>
+
+</body>
+</html>
